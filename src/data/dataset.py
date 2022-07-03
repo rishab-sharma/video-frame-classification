@@ -3,7 +3,7 @@ import json
 import random
 from glob import glob
 
-from torchvision.datasets.vision import VisionDataset
+from torch.utils.data import Dataset
 from torchvision.io import read_image
 import torchvision.transforms as transforms
 
@@ -21,7 +21,7 @@ test_transform = transforms.Compose([
                                 transforms.CenterCrop(224),
                                 transforms.ToTensor()])
 
-class CustomVideoDataset(VisionDataset):
+class CustomVideoDataset(Dataset):
     def __init__(self, data_dir, ann_file, target_transform=None, val=False):
         
         self.data_dir = data_dir
