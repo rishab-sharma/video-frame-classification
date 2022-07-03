@@ -7,4 +7,4 @@ python-json-logger==0.1.10
 environs
 pydantic
 wandb
-segmentation-models-pytorch
+timm
