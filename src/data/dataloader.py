@@ -11,7 +11,7 @@ def worker_init_fn(worker_id):
 
 def get_generator(context):
 
-    data_dir = context['frame_dir']
+    data_dir = context["datasets"]["frame_dir"]
 
     train_dataset = CustomVideoDataset(data_dir=data_dir)
     val_dataset = CustomVideoDataset(data_dir=data_dir)

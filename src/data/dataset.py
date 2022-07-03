@@ -9,10 +9,14 @@ from torchvision.io import read_image
 
 
 class CustomVideoDataset(VisionDataset):
-    def __init__(self, data_dir, ann_file, transform=None, target_transform=None):
+    def __init__(self, data_dir, ann_file, transform=None, target_transform=None, val=False):
         
         self.data_dir = data_dir
-        self.frame_dirs = glob(os.path.join(data_dir, "*"))        
+        dir_len = len(glob(os.path.join(data_dir, "*")))
+        if not val:
+            self.frame_dirs = glob(os.path.join(data_dir, "*"))[:int(dir_len*0.8)]
+        else:
+            self.frame_dirs = glob(os.path.join(data_dir, "*"))[int(dir_len*0.8):]
    
         f = open(ann_file)
         self.ann_file = json.load(f)         
