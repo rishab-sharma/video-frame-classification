@@ -12,9 +12,10 @@ def worker_init_fn(worker_id):
 def get_generator(context):
 
     data_dir = context["datasets"]["frame_dir"]
+    ann_file = context["datasets"]["ann_file"]
 
-    train_dataset = CustomVideoDataset(data_dir=data_dir)
-    val_dataset = CustomVideoDataset(data_dir=data_dir)
+    train_dataset = CustomVideoDataset(data_dir=data_dir, ann_file=ann_file)
+    val_dataset = CustomVideoDataset(data_dir=data_dir, ann_file=ann_file)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=config.BATCH_SIZE,

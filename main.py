@@ -20,5 +20,8 @@ def handler(context):
 
 if __name__ == "__main__":
     context = {}
-    context['datasets'] = {'frame_dir': '/mnt/notebooks/2775883169583/images/'}
+    context['datasets'] = {
+        'frame_dir': '/mnt/notebooks/2775883169583/images/',
+        'ann_file': '/mnt/notebooks/2775883169583/ann.json'
+        }
     handler(context)
