@@ -10,25 +10,20 @@ from config import config
 from src.eval import evaluate
 from src.models.model import create_model
 from src.data.dataloader import get_generator
-from src.data.abeja_utils.pytorchtools import EarlyStopping
-from src.data.abeja_utils import reports
 
 
 def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, num_classes, apply_nonlin=None):
 
     epoch_loss = list()
     model.train()
-    confmat = reports.ConfusionMatrix(num_classes)
     
     for image, target in tqdm(data_loader):
         image, target = image.to(device), target.to(device)
         output = model(image)
-        loss = criterion(output, target, apply_nonlin=apply_nonlin)
+        loss = criterion(output, target)
         epoch_loss.append(loss.item())
         
-        output = output
-        
-        confmat.update(target.flatten(), output.argmax(1).flatten())
+        output = output        
 
         optimizer.zero_grad()
         loss.backward()
@@ -36,10 +31,9 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
 
         lr_scheduler.step()
 
-    confmat.reduce_from_all_processes()
     avg_loss = sum(epoch_loss)/len(epoch_loss) if len(epoch_loss) else 0.0
 
-    return confmat, avg_loss
+    return avg_loss
 
 
 def handler(context):
@@ -77,7 +71,6 @@ def handler(context):
     criterion = nn.CrossEntropyLoss()
     
     wandb.watch(model)
-    early_stopping = EarlyStopping(ckp_dir=config.ABEJA_TRAINING_RESULT_DIR, metric_name='val_iou', patience=config.EARLY_STOPPING_PATIENCE, verbose=True)
 
     for epoch in range(config.EPOCHS):
         model.to(device)
@@ -103,13 +96,7 @@ def handler(context):
             "Validation Loss": average_epoch_val_loss,
             "LR": lr_scheduler.get_last_lr()[0],            
             })
-
-        early_stopping(average_epoch_val_loss, model, optimizer, epoch)
-
-        if early_stopping.early_stop:
-            print('--------------')
-            print("Early stopping")
-            break
+        
     # save final model
     torch.save(model.to('cpu').state_dict(), os.path.join(config.ABEJA_TRAINING_RESULT_DIR, f'best-model-{epoch}.pth'))
 

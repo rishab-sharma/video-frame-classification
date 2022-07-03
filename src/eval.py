@@ -5,7 +5,7 @@ from tqdm import tqdm
 from config import config
 
 
-def evaluate(model, criterion, data_loader, device, num_classes, apply_nonlin=None):
+def evaluate(model, criterion, data_loader, device, num_classes):
     epoch_loss = list()
     model.eval()
 
@@ -13,7 +13,7 @@ def evaluate(model, criterion, data_loader, device, num_classes, apply_nonlin=No
         for image, target in tqdm(data_loader):
             image, target = image.to(device), target.to(device)
             output = model(image)
-            loss = criterion(output, target, apply_nonlin=apply_nonlin)
+            loss = criterion(output, target)
             epoch_loss.append(loss.item())
 
             if config.MODEL_NAME in ['u2net']:
@@ -26,7 +26,7 @@ def evaluate(model, criterion, data_loader, device, num_classes, apply_nonlin=No
     
     avg_loss = sum(epoch_loss)/len(epoch_loss) if len(epoch_loss) else 0.0
 
-    return confmat, avg_loss
+    return avg_loss
 
 def handler():
     pass
