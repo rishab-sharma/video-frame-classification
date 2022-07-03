@@ -77,79 +77,37 @@ def handler(context):
         optimizer,
         lambda x: (1 - x / (len(train_loader) * config.EPOCHS)) ** 0.9)
     
+    criterion = nn.CrossEntropyLoss()
+    
     wandb.watch(model)
     early_stopping = EarlyStopping(ckp_dir=config.ABEJA_TRAINING_RESULT_DIR, metric_name='val_iou', patience=config.EARLY_STOPPING_PATIENCE, verbose=True)
-    
-    if config.APPLY_NONLIN:
-        apply_nonlin = softmax_helper # torch.nn.Softmax(dim=1)
-    else:
-        apply_nonlin = None
 
     for epoch in range(config.EPOCHS):
         model.to(device)
         
-        train_confmat, average_epoch_train_loss = train_one_epoch(
-                model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, num_classes, apply_nonlin=apply_nonlin)
-        eval_confmat, average_epoch_val_loss = evaluate(
-            model, criterion, val_loader, device=device, num_classes=num_classes, apply_nonlin=apply_nonlin)
+        average_epoch_train_loss = train_one_epoch(
+            model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, num_classes)
+        average_epoch_val_loss = evaluate(
+            model, criterion, val_loader, device=device, num_classes=num_classes)
 
-        average_epoch_train_acc, train_prec, train_recal, train_iu = train_confmat.compute()
-        average_epoch_val_acc, val_prec, val_recal, val_iu = eval_confmat.compute()
 
         with open(os.path.join(config.ABEJA_TRAINING_RESULT_DIR, "logs.txt"), "a+") as file:
             file.write(f"""
                 ******\n
                 Training Loss: {average_epoch_train_loss}\n
-                Validation Loss: {average_epoch_val_loss}\n
-                Training Accuracy: {average_epoch_train_acc.item() * 100}\n
-                Validation Accuracy: {average_epoch_val_acc.item() * 100}\n
-                Training Precision: {['{:.1f}'.format(i) for i in (train_prec * 100).tolist()]}\n
-                Validation Precision: {['{:.1f}'.format(i) for i in (val_prec * 100).tolist()]}\n
-                Training Recall: {['{:.1f}'.format(i) for i in (train_recal * 100).tolist()]}\n
-                Validation Recall: {['{:.1f}'.format(i) for i in (val_recal * 100).tolist()]}\n
-                Training IoU: {['{:.1f}'.format(i) for i in (train_iu).tolist()]}\n
-                Training Mean IoU: {train_iu.mean().item()}\n
-                Validation IoU: {['{:.1f}'.format(i) for i in (val_iu).tolist()]}\n
-                Validation Mean IoU: {val_iu.mean().item()}\n
+                Validation Loss: {average_epoch_val_loss}\n                
             """)
+        
         print(f"Epoch {epoch} Training Loss =>", average_epoch_train_loss)
         print(f"Epoch {epoch} Validation Loss =>", average_epoch_val_loss)
-        print(f"Epoch {epoch} Training Accuracy =>", average_epoch_train_acc.item() * 100)
-        print(f"Epoch {epoch} Validation Accuracy =>", average_epoch_val_acc.item() * 100)
-        print(f"Epoch {epoch} Training Precision =>", ['{:.1f}'.format(i) for i in (train_prec * 100).tolist()])
-        print(f"Epoch {epoch} Validation Precision =>", ['{:.1f}'.format(i) for i in (val_prec * 100).tolist()])
-        print(f"Epoch {epoch} Training Mean Precision =>", (train_prec * 100).mean().item())
-        print(f"Epoch {epoch} Validation Mean Precision =>", (val_prec * 100).mean().item())
-        print(f"Epoch {epoch} Training Recall =>", ['{:.1f}'.format(i) for i in (train_recal * 100).tolist()])
-        print(f"Epoch {epoch} Validation Recall =>", ['{:.1f}'.format(i) for i in (val_recal * 100).tolist()])
-        print(f"Epoch {epoch} Training Mean Recall =>", (train_recal * 100).mean().item())
-        print(f"Epoch {epoch} Validation Mean Recall =>", (val_recal * 100).mean().item())
-        print(f"Epoch {epoch} Training IoU =>", ['{:.1f}'.format(i) for i in (train_iu).tolist()])
-        print(f"Epoch {epoch} Training Mean IoU =>", train_iu.mean().item())
-        print(f"Epoch {epoch} Validation IoU =>", ['{:.1f}'.format(i) for i in (val_iu).tolist()])
-        print(f"Epoch {epoch} Validation Mean IoU =>", val_iu.mean().item())
-
+        
         wandb.log({
             "Training Loss": average_epoch_train_loss,
             "Validation Loss": average_epoch_val_loss,
-            "LR": lr_scheduler.get_last_lr()[0],
-            "Training Accuracy": average_epoch_train_acc.item() * 100,
-            "Validation Accuracy": average_epoch_val_acc.item() * 100,
-            "Training Precision": wandb.Histogram((train_prec * 100).tolist()),
-            "Validation Precision": wandb.Histogram((val_prec * 100).tolist()),
-            "Training Mean Precision": (train_prec * 100).mean().item(),
-            "Validation Mean Precision": (val_prec * 100).mean().item(),
-            "Training Recall": wandb.Histogram((train_recal * 100).tolist()),
-            "Validation Recall": wandb.Histogram((val_recal * 100).tolist()),
-            "Training Mean Recall": (train_recal * 100).mean().item(),
-            "Validation Mean Recall": (val_recal * 100).mean().item(),
-            "Training IoU": wandb.Histogram((train_iu * 100).tolist()),
-            "Validation IoU": wandb.Histogram((val_iu * 100).tolist()),
-            "Training Mean IoU": train_iu.mean().item(),
-            "Validation Mean IoU": val_iu.mean().item()
+            "LR": lr_scheduler.get_last_lr()[0],            
             })
 
-        early_stopping(val_iu.mean().item(), model, optimizer, epoch)
+        early_stopping(average_epoch_val_loss, model, optimizer, epoch)
 
         if early_stopping.early_stop:
             print('--------------')

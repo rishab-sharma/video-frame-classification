@@ -12,7 +12,7 @@ class EnvironmentVariable(BaseModel):
     
     # TRAINING CONFIGS
     DATA: str = str(os.environ.get('DATA', 'abeja'))
-    MODEL_NAME: str = str(os.environ.get('MODEL_NAME', 'deeplabv3_resnet101')) # deeplabv3_resnet101 u2net se_resnext101_32x4d dpn98
+    MODEL_NAME: str = str(os.environ.get('MODEL_NAME', 'mobilenetv3_large_100')) # deeplabv3_resnet101 u2net se_resnext101_32x4d dpn98
     LOSS_FUNC: str = str(os.environ.get('LOSS_FUNC', 'deeplabv3_ce')) # u2net_ce deeplabv3_ce qubvel_ce
 
     BATCH_SIZE: int = int(os.environ.get('BATCH_SIZE', '6'))
@@ -44,7 +44,7 @@ class LocalConfig(BaseModel):
 
 
 class ProjectConfig:
-    PROJECT_DOMAIN: str = "kkc-roadmarking-segmentation"
+    PROJECT_DOMAIN: str = "mgc-resin-seperation"
     PROJECT_DIR: str = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "opt")
     TEMP_DIR: str = os.path.join(PROJECT_DIR, "temp")
 

@@ -20,5 +20,5 @@ def handler(context):
 
 if __name__ == "__main__":
     context = {}
-    context['datasets'] = {'part_val': '2676439455897'}
+    context['datasets'] = {'frame_dir': '/mnt/notebooks/2775883169583/images/'}
     handler(context)

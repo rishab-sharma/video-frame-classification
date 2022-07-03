@@ -1,48 +1,50 @@
 import os
-import cv2
-from config import config
+import json
 import random
-from torchvision.datasets.vision import VisionDataset
 from glob import glob
+
+from torchvision.datasets.vision import VisionDataset
+from torchvision.io import read_image
+
 
 
 class CustomVideoDataset(VisionDataset):
-    def __init__(self, data_dir, transform=None, target_transform=None, frame_batch=8):
+    def __init__(self, data_dir, ann_file, transform=None, target_transform=None):
         
         self.data_dir = data_dir
-        self.video_files = glob(os.path.join(data_dir, "*.mp4"))
-        self.ann_files = [os.path.join(data_dir, x.split('/')[-1][:-4]+".txt") for x in self.video_files]
+        self.frame_dirs = glob(os.path.join(data_dir, "*"))        
+   
+        f = open(ann_file)
+        self.ann_file = json.load(f)         
         
         self.transform = transform
-        self.target_transform = target_transform
-        self.frame_batch=frame_batch
+        self.target_transform = target_transform        
 
     def __len__(self):
-        return len(self.video_files)
+        return len(self.frame_dirs)
 
     def __getitem__(self, idx):
         
-        video_path = self.video_files[idx]
-        ann_path = self.ann_files[idx]
+        frames_path = self.frame_dirs[idx]
+        ann = self.ann_files[frames_path.split("/")[-1]]
 
-        ## Getting video frames
-        video = cv2.VideoCapture(video_path)
-        frames = video.get(cv2.CAP_PROP_FRAME_COUNT)
-        # fps = int(video.get(cv2.CAP_PROP_FPS))
-        frame_no = random.randint(0,frames - 12)
-        video.set(1,frame_no)
-        images = []        
-        for _ in range(self.frame_batch):
-            _, image = video.read()
-            images.append(image)
-
-        ## Getting frame labels
-        with open(ann_path, "r") as file:
-            all_labels = file.readlines()
-        labels = all_labels[frame_no: frame_no + self.frame_batch]
-            
+        if idx%2 == 0:
+            cat = "positive"
+            img_id = random.randint(ann[cat][0][0], ann[cat][0][1])
+            label = 1
+        else:
+            cat = "negative"
+            if random.randint(0, 10)%2 ==0:
+                img_id = random.randint(ann[cat][0][0], ann[cat][0][1])
+            else:
+                img_id = random.randint(ann[cat][1][0], ann[cat][1][1])
+            label = 0
+        
+        img_path = os.path.join(frames_path, f"{img_id}.jpg")
+        image = read_image(img_path)
+        
         if self.transform:
-            images = self.transform(images)
+            image = self.transform(image)
         if self.target_transform:
-            labels = self.target_transform(labels)
-        return images, labels
+            label = self.target_transform(label)
+        return image, label
