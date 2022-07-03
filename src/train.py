@@ -12,7 +12,7 @@ from src.models.model import create_model
 from src.data.dataloader import get_generator
 
 
-def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, num_classes, apply_nonlin=None):
+def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device):
 
     epoch_loss = list()
     model.train()
@@ -55,8 +55,10 @@ def handler(context):
 
     train_loader, val_loader = get_generator(context)
 
-    model, params_to_optimize, criterion = create_model(
-        num_classes=2,
+    num_classes = 2
+
+    model, params_to_optimize = create_model(
+        num_classes=num_classes,
         model_name=config.MODEL_NAME,
         pretrained=True)
     
@@ -76,7 +78,7 @@ def handler(context):
         model.to(device)
         
         average_epoch_train_loss = train_one_epoch(
-            model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, num_classes)
+            model, criterion, optimizer, train_loader, lr_scheduler, device)
         average_epoch_val_loss = evaluate(
             model, criterion, val_loader, device=device, num_classes=num_classes)
 
