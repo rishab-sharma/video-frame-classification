@@ -1,10 +1,6 @@
 import timm
 import torch
 
-from torch import nn
-from config import config
-
-from src.models.losses.losses import LOSS_DICT
 
 
 device_name = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -20,12 +16,9 @@ def create_model(num_classes, model_name='mobilenetv3_large_100', pretrained=Tru
     :return model: ML Network.
     """
 
-    if config.LOSS_FUNC not in LOSS_DICT.keys():
-        raise Exception(f"\n** Loss Function: {config.LOSS_FUNC} not supported |\n** Supported loss functions are: {list(LOSS_DICT.keys())} |")
-
-    model = timm.create_model(model_name, pretrained=True, num_classes=2)
+    model = timm.create_model(model_name, pretrained=pretrained, num_classes=num_classes)
 
     params_to_optimize = model.parameters()
     model.to(device)
 
-    return model, params_to_optimize, LOSS_DICT.get(config.LOSS_FUNC)
+    return model, params_to_optimize

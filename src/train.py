@@ -8,9 +8,7 @@ from tqdm import tqdm
 
 from config import config
 from src.eval import evaluate
-from src.predict import predict_on_samples
 from src.models.model import create_model
-from src.models.losses.dice_loss import softmax_helper
 from src.data.dataloader import get_generator
 from src.data.abeja_utils.pytorchtools import EarlyStopping
 from src.data.abeja_utils import reports
@@ -66,8 +64,7 @@ def handler(context):
     model, params_to_optimize, criterion = create_model(
         num_classes=num_classes,
         model_name=config.MODEL_NAME,
-        pretrained=True,
-        finetuning=False)
+        pretrained=True)
     
     optimizer = torch.optim.SGD(
         params_to_optimize,
