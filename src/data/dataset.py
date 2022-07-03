@@ -46,7 +46,7 @@ class CustomVideoDataset(Dataset):
     def __getitem__(self, idx):
         
         frames_path = self.frame_dirs[idx]
-        ann = self.ann_files[frames_path.split("/")[-1]]
+        ann = self.ann_file[frames_path.split("/")[-1]]
 
         if idx%2 == 0:
             cat = "positive"
