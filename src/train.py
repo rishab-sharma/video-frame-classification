@@ -53,10 +53,10 @@ def handler(context):
     
     print('Device Name: {}'.format(device_name))
 
-    train_loader, val_loader, num_classes = get_generator(context)
+    train_loader, val_loader = get_generator(context)
 
     model, params_to_optimize, criterion = create_model(
-        num_classes=num_classes,
+        num_classes=2,
         model_name=config.MODEL_NAME,
         pretrained=True)
     
