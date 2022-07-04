@@ -32,8 +32,8 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
 
         lr_scheduler.step()
 
-        predicted = torch.argmax(output.cpu(), 1)
-        correct += (predicted == target.cup()).sum().item()
+        predicted = torch.argmax(output, 1)
+        correct += (predicted == target).sum().item()
         total += target.size(0)
 
     avg_loss = sum(epoch_loss)/len(epoch_loss) if len(epoch_loss) else 0.0
