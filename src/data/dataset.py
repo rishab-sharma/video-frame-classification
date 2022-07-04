@@ -3,8 +3,8 @@ import json
 import random
 from glob import glob
 
+from PIL import Image
 from torch.utils.data import Dataset
-from torchvision.io import read_image
 import torchvision.transforms as transforms
 
 transform = transforms.Compose(
@@ -61,7 +61,7 @@ class CustomVideoDataset(Dataset):
             label = 0
         
         img_path = os.path.join(frames_path, f"{img_id}.jpg")
-        image = read_image(img_path)
+        image = Image.open(img_path)
         
         if self.transform:
             image = self.transform(image)
