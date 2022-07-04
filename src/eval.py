@@ -18,7 +18,7 @@ def evaluate(model, criterion, data_loader, device, num_classes):
             
             output = output
 
-            predicted = torch.argmax(output.cpu(), 1)
+            predicted = torch.argmax(output, 1)
             correct += (predicted == target).sum().item()
             total += target.size(0)
 
