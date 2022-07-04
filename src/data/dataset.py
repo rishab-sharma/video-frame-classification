@@ -11,11 +11,13 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-train_transform = transforms.Compose([transforms.Resize(255),transforms.RandomResizedCrop(224),
+train_transform = transforms.Compose([transforms.Resize(255),
+                                transforms.RandomResizedCrop(224),
                                 transforms.CenterCrop(224),
-                                transforms.RandomHorizontalFlip(),
-                                transforms.ColorJitter(),
-                                transforms.ToTensor()])
+                                transforms.RandomHorizontalFlip(),                                
+                                # transforms.ColorJitter(),
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 test_transform = transforms.Compose([
                                 transforms.Resize(255),
                                 transforms.CenterCrop(224),
@@ -29,7 +31,7 @@ class CustomVideoDataset(Dataset):
 
         if not val:
             transform=train_transform
-            self.frame_dirs = glob(os.path.join(data_dir, "*"))[:int(dir_len*0.8)]
+            self.frame_dirs = glob(os.path.join(data_dir, "*"))[:int(dir_len*0.8)]*100
         else:
             transform=test_transform
             self.frame_dirs = glob(os.path.join(data_dir, "*"))[int(dir_len*0.8):]
