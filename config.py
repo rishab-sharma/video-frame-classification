@@ -16,7 +16,7 @@ class EnvironmentVariable(BaseModel):
     LOSS_FUNC: str = str(os.environ.get('LOSS_FUNC', 'deeplabv3_ce')) # u2net_ce deeplabv3_ce qubvel_ce
 
     BATCH_SIZE: int = int(os.environ.get('BATCH_SIZE', '6'))
-    EPOCHS: int = int(os.environ.get('EPOCHS', '100'))
+    EPOCHS: int = int(os.environ.get('EPOCHS', '50'))
     VAL_SIZE_RATIO: float = float(os.environ.get('VAL_SIZE_RATIO', '0.2'))
     NUM_TRAIN: int = int(os.environ.get('NUM_TRAIN', '2000'))
     NUM_VAL: int = int(os.environ.get('NUM_VAL', '200'))

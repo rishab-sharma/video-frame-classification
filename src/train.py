@@ -16,14 +16,15 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
 
     epoch_loss = list()
     model.train()
+
+    correct = 0
+    total = 0
     
     for image, target in tqdm(data_loader):
         image, target = image.to(device), target.to(device)
         output = model(image)
         loss = criterion(output, target)
         epoch_loss.append(loss.item())
-        
-        output = output        
 
         optimizer.zero_grad()
         loss.backward()
@@ -31,9 +32,14 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
 
         lr_scheduler.step()
 
-    avg_loss = sum(epoch_loss)/len(epoch_loss) if len(epoch_loss) else 0.0
+        predicted = torch.argmax(output.cpu(), 1)
+        correct += (predicted == target).sum().item()
+        total += target.size(0)
 
-    return avg_loss
+    avg_loss = sum(epoch_loss)/len(epoch_loss) if len(epoch_loss) else 0.0
+    avg_accuracy = 100 * (correct // total)
+
+    return avg_loss, avg_accuracy
 
 
 def handler(context):
@@ -77,9 +83,9 @@ def handler(context):
     for epoch in range(config.EPOCHS):
         model.to(device)
         
-        average_epoch_train_loss = train_one_epoch(
+        average_epoch_train_loss, avg_train_accuracy = train_one_epoch(
             model, criterion, optimizer, train_loader, lr_scheduler, device)
-        average_epoch_val_loss = evaluate(
+        average_epoch_val_loss, avg_val_accuracy = evaluate(
             model, criterion, val_loader, device=device, num_classes=num_classes)
 
 
@@ -87,15 +93,21 @@ def handler(context):
             file.write(f"""
                 ******\n
                 Training Loss: {average_epoch_train_loss}\n
-                Validation Loss: {average_epoch_val_loss}\n                
+                Validation Loss: {average_epoch_val_loss}\n
+                Training Accuracy: {avg_train_accuracy}\n
+                Validation Accuracy: {avg_val_accuracy}\n
             """)
         
         print(f"Epoch {epoch} Training Loss =>", average_epoch_train_loss)
         print(f"Epoch {epoch} Validation Loss =>", average_epoch_val_loss)
+        print(f"Epoch {epoch} Training Accuracy =>", avg_train_accuracy)
+        print(f"Epoch {epoch} Validation Accuracy =>", avg_val_accuracy)
         
         wandb.log({
             "Training Loss": average_epoch_train_loss,
             "Validation Loss": average_epoch_val_loss,
+            "Training Accuracy": avg_train_accuracy,
+            "Validation Accuracy": avg_val_accuracy,
             "LR": lr_scheduler.get_last_lr()[0],            
             })
         
