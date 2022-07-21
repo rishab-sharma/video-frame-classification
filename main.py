@@ -21,4 +21,6 @@ if __name__ == "__main__":
         'frame_dir': '/mnt/notebooks/2775883169583/images/',
         'ann_file': '/mnt/notebooks/2775883169583/ann.json'
         }
+    config.EPOCHS = 11
+    config.BATCH_SIZE = 64
     handler(context)

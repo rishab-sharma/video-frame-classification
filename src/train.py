@@ -43,14 +43,16 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
 
 
 def handler(context):
+    is_wandb = False
 
-    print("Initiating Wandb")
-    wandb.init(project=config.PROJECT_DOMAIN, entity="kraken")
-    wandb.config = {
-        "learning_rate": config.LEARNING_RATE,
-        "epochs": config.EPOCHS,
-        "batch_size": config.BATCH_SIZE
-        }
+    if is_wandb:
+        print("Initiating Wandb")
+        wandb.init(project=config.PROJECT_DOMAIN, entity="kraken")
+        wandb.config = {
+            "learning_rate": config.LEARNING_RATE,
+            "epochs": config.EPOCHS,
+            "batch_size": config.BATCH_SIZE
+            }
 
     print(f"Working in Project Directory - {config.PROJECT_DIR}")
     
@@ -76,9 +78,10 @@ def handler(context):
         optimizer,
         lambda x: (1 - x / (len(train_loader) * config.EPOCHS)) ** 0.9)
     
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     
-    wandb.watch(model)
+    if is_wandb:
+        wandb.watch(model)
 
     for epoch in range(config.EPOCHS):
         model.to(device)
@@ -103,13 +106,14 @@ def handler(context):
         print(f"Epoch {epoch} Training Accuracy =>", avg_train_accuracy)
         print(f"Epoch {epoch} Validation Accuracy =>", avg_val_accuracy)
         
-        wandb.log({
-            "Training Loss": average_epoch_train_loss,
-            "Validation Loss": average_epoch_val_loss,
-            "Training Accuracy": avg_train_accuracy,
-            "Validation Accuracy": avg_val_accuracy,
-            "LR": lr_scheduler.get_last_lr()[0],            
-            })
+        if is_wandb:
+            wandb.log({
+                "Training Loss": average_epoch_train_loss,
+                "Validation Loss": average_epoch_val_loss,
+                "Training Accuracy": avg_train_accuracy,
+                "Validation Accuracy": avg_val_accuracy,
+                "LR": lr_scheduler.get_last_lr()[0],            
+                })
         
     # save final model
     torch.save(model.to('cpu').state_dict(), os.path.join(config.ABEJA_TRAINING_RESULT_DIR, f'best-model-{epoch}.pth'))

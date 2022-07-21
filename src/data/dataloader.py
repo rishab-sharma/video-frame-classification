@@ -10,6 +10,8 @@ def get_generator(context):
 
     train_dataset = CustomVideoDataset(data_dir=data_dir, ann_file=ann_file)
     val_dataset = CustomVideoDataset(data_dir=data_dir, ann_file=ann_file, val=True)
+#     print(f"Train Dataset Files: {train_dataset.frame_dirs}")
+#     print(f"Val Dataset Files: {val_dataset.frame_dirs}")
 
     train_dataloader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, drop_last=True, shuffle=True)
     test_dataloader = DataLoader(val_dataset, batch_size=config.BATCH_SIZE, drop_last=True, shuffle=True)
