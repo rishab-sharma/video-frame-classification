@@ -69,7 +69,7 @@ class CustomVideoDataset(Dataset):
         fps = ann["fps"]
         if idx%3 == 0:
             cat = "positive"
-            img_id = random.randint(ann[cat][0][0]*fps, ann[cat][0][1]*fps)[0]
+            img_id = random.randint(ann[cat][0][0]*fps, ann[cat][0][1]*fps)
             label = 1
         else:
             cat = "negative"
