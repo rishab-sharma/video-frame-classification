@@ -4,7 +4,7 @@ from environs import Env
 from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
 
-from abejacli import config as abeja_config
+# from abejacli import config as abeja_config
 
 
 class EnvironmentVariable(BaseModel):
@@ -49,10 +49,10 @@ class ProjectConfig:
     TEMP_DIR: str = os.path.join(PROJECT_DIR, "temp")
 
     ORG_ID: str = "2103353894345"
-    CREDENTIAL: dict = {
-        'user_id': abeja_config.config.user,
-        'personal_access_token': abeja_config.config.token
-    }
+    # CREDENTIAL: dict = {
+    #     'user_id': abeja_config.config.user,
+    #     'personal_access_token': abeja_config.config.token
+    # }
     NEW_CAT_JSON: str = os.path.join(PROJECT_DIR, "src/data/abeja_utils", "categories_new.json")
     OLD_CAT_JSON: str = os.path.join(PROJECT_DIR, "src/data/abeja_utils", "categories_old.json")
     ABEJA_DATASET_VERSION: bool = bool(os.environ.get('DATASET_VERSION', 'True').lower() == 'true')
