@@ -50,7 +50,7 @@ class CustomVideoDataset(Dataset):
     def __len__(self):
         return len(self.frame_dirs)*100
     
-    def get_random_image_id(self, idx, ann):
+    def get_random_image_id(self, idx, ann):        
         if idx%3 == 0:
             cat = "positive"
             img_id = random.randint(ann[cat][0][0], ann[cat][0][1])
@@ -61,6 +61,24 @@ class CustomVideoDataset(Dataset):
                 img_id = random.randint(ann[cat][0][0], ann[cat][0][1])
             else:
                 img_id = random.randint(ann[cat][1][0], ann[cat][1][1])
+            label = 0
+        return img_id, label
+
+
+    def get_random_image_id_colab(self, idx, ann):
+        fps = ann["fps"]
+        if idx%3 == 0:
+            cat = "positive"
+            img_id = random.randint(ann[cat][0][0]*fps, ann[cat][0][1]*fps)
+            label = 1
+        else:
+            cat = "negative"
+            # if random.randint(0, 10)%2 ==0:
+            list_ = range(19, ann[cat][0][1]*fps, 19)
+            img_id = random.sample(list_, 1)
+            # else:
+            #     list_ = range(19, ann[cat][0][1]*fps, 19)
+            #     img_id = random.randint(ann[cat][1][0], ann[cat][1][1])
             label = 0
         return img_id, label
 
