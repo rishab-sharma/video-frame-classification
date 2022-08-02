@@ -18,8 +18,8 @@ def handler(context):
 if __name__ == "__main__":
     context = {}
     context['datasets'] = {
-        'frame_dir': '/mnt/notebooks/2775883169583/images/',
-        'ann_file': '/mnt/notebooks/2775883169583/ann.json'
+        'frame_dir': '/content/sample_data/images/',
+        'ann_file': '/content/ann.json'
         }
     config.EPOCHS = 11
     config.BATCH_SIZE = 64
