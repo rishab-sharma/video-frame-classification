@@ -88,7 +88,7 @@ class CustomVideoDataset(Dataset):
 
         image = None
         while image is None:
-            img_id, label = self.get_random_image_id(idx, ann)
+            img_id, label = self.get_random_image_id_colab(idx, ann)
             try:
                 img_path = os.path.join(frames_path, f"{img_id}.jpg")
                 image = Image.open(img_path)
